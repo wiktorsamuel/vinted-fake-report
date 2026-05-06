@@ -342,7 +342,7 @@ select{background:var(--surface);border:1px solid var(--border);border-radius:va
     <div class="login-card">
       <h2>Panel admina</h2>
       <p>Zaloguj się, aby moderować zgłoszenia</p>
-      <div class="login-group"><label>Login</label><input type="text" id="login-user" placeholder="login" autocomplete="username"></div>
+      <div class="login-group"><label>Login</label><input type="email" id="login-user" placeholder="email@domena.pl" autocomplete="email"></div>
       <div class="login-group"><label>Hasło</label><input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
       <div class="login-error" id="login-error">Nieprawidłowy login lub hasło.</div>
       <button class="btn-login" onclick="doLogin()">Zaloguj się →</button>
@@ -381,15 +381,44 @@ select{background:var(--surface);border:1px solid var(--border);border-radius:va
 <div class="lightbox" id="lightbox" onclick="closeLightbox()"><img id="lightbox-img" src="" alt=""></div>
 
 <script>
-// ============================================================
-// KONFIGURACJA — zmień przed wdrożeniem na Supabase
-// ============================================================
-const ADMINS = {
-  'admin1': { pass: 'haslo123', role: 'Administrator' },
-  'admin2': { pass: 'vinted99', role: 'Moderator' },
-  'redakcja': { pass: 'redakcja!', role: 'Redaktor' }
-};
-// ============================================================
+const { createClient } = supabase;
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+async function doLogin() {
+  const email = document.getElementById('login-user').value.trim();
+  const password = document.getElementById('login-pass').value;
+  const err = document.getElementById('login-error');
+
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+
+  if (error || !data.user) {
+    err.classList.add('show');
+    return;
+  }
+
+  // Pobierz rolę z metadanych użytkownika (ustaw je w Supabase → Authentication → Users → Edit)
+  const role = data.user.user_metadata?.role || 'Admin';
+  currentAdmin = { login: email, role };
+
+  err.classList.remove('show');
+  document.getElementById('tab-admin').style.display = '';
+  document.getElementById('tab-login').style.display = 'none';
+  document.getElementById('nav-admin-info').style.display = 'flex';
+  document.getElementById('nav-who').textContent = `${email} · ${role}`;
+  document.getElementById('login-user').value = '';
+  document.getElementById('login-pass').value = '';
+  showView('admin');
+  renderAdmin();
+}
+
+async function logout() {
+  await supabaseClient.auth.signOut();
+  currentAdmin = null;
+  document.getElementById('tab-admin').style.display = 'none';
+  document.getElementById('tab-login').style.display = '';
+  document.getElementById('nav-admin-info').style.display = 'none';
+  showView('home');
+}
 
 const STORAGE_KEY = 'fakereport_data';
 const COUNTRIES = ["Afganistan","Albania","Algieria","Andora","Angola","Antigua i Barbuda","Arabia Saudyjska","Argentyna","Armenia","Australia","Austria","Azerbejdżan","Bahamy","Bahrajn","Bangladesz","Barbados","Belgia","Belize","Benin","Bhutan","Białoruś","Birma (Myanmar)","Boliwia","Bośnia i Hercegowina","Botswana","Brazylia","Brunei","Bułgaria","Burkina Faso","Burundi","Chile","Chiny","Chorwacja","Cypr","Czad","Czarnogóra","Czechy","Dania","Demokratyczna Republika Konga","Dominika","Dominikana","Dżibuti","Egipt","Ekwador","Erytrea","Estonia","Etiopia","Fidżi","Filipiny","Finlandia","Francja","Gabon","Gambia","Ghana","Grecja","Grenada","Gruzja","Gwinea","Gwinea Bissau","Gwinea Równikowa","Gujana","Haiti","Hiszpania","Holandia","Honduras","Indie","Indonezja","Irak","Iran","Irlandia","Islandia","Izrael","Jamajka","Japonia","Jemen","Jordania","Kambodża","Kamerun","Kanada","Katar","Kazachstan","Kenia","Kiribati","Kolumbia","Komory","Kongo","Korea Południowa","Korea Północna","Kostaryka","Kuba","Kuwejt","Kirgistan","Laos","Lesotho","Liban","Liberia","Libia","Liechtenstein","Litwa","Luksemburg","Łotwa","Macedonia Północna","Madagaskar","Malawi","Malediwy","Malezja","Mali","Malta","Maroko","Mauretania","Mauritius","Meksyk","Mikronezja","Mołdawia","Monako","Mongolia","Mozambik","Namibia","Nauru","Nepal","Niemcy","Niger","Nigeria","Nikaragua","Norwegia","Nowa Zelandia","Oman","Pakistan","Palau","Panama","Papua Nowa Gwinea","Paragwaj","Peru","Polska","Portugalia","Republika Południowej Afryki","Republika Środkowoafrykańska","Republika Zielonego Przylądka","Rosja","Rumunia","Rwanda","Saint Kitts i Nevis","Saint Lucia","Saint Vincent i Grenadyny","Salwador","Samoa","San Marino","Senegal","Serbia","Seszele","Sierra Leone","Singapur","Słowacja","Słowenia","Somalia","Sri Lanka","Sudan","Sudan Południowy","Surinam","Suazi","Syria","Szwajcaria","Szwecja","Tadżykistan","Tajlandia","Tanzania","Timor Wschodni","Togo","Tonga","Trynidad i Tobago","Tunezja","Turcja","Turkmenistan","Tuvalu","Uganda","Ukraina","Urugwaj","Uzbekistan","Vanuatu","Wenezuela","Węgry","Wielka Brytania","Wietnam","Włochy","Wybrzeże Kości Słoniowej","Wyspy Marshalla","Wyspy Salomona","Wyspy Świętego Tomasza i Książęca","Zambia","Zimbabwe","Zjednoczone Emiraty Arabskie","Stany Zjednoczone"];
@@ -699,28 +728,7 @@ document.getElementById('modal-confirm').onclick = () => { if (modalCallback) mo
 function openLightbox(src) { document.getElementById('lightbox-img').src = src; document.getElementById('lightbox').classList.add('open'); }
 function closeLightbox() { document.getElementById('lightbox').classList.remove('open'); }
 
-function doLogin() {
-  const u = document.getElementById('login-user').value.trim();
-  const p = document.getElementById('login-pass').value;
-  const err = document.getElementById('login-error');
-  if (ADMINS[u] && ADMINS[u].pass === p) {
-    currentAdmin = { login: u, role: ADMINS[u].role };
-    err.classList.remove('show');
-    document.getElementById('tab-admin').style.display = '';
-    document.getElementById('tab-login').style.display = 'none';
-    document.getElementById('nav-admin-info').style.display = 'flex';
-    document.getElementById('nav-who').textContent = `${u} · ${ADMINS[u].role}`;
-    document.getElementById('login-user').value = ''; document.getElementById('login-pass').value = '';
-    showView('admin'); renderAdmin();
-  } else { err.classList.add('show'); }
-}
-function logout() {
-  currentAdmin = null;
-  document.getElementById('tab-admin').style.display = 'none';
-  document.getElementById('tab-login').style.display = '';
-  document.getElementById('nav-admin-info').style.display = 'none';
-  showView('home');
-}
+
 
 function showView(v) {
   document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
