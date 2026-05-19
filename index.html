@@ -712,11 +712,13 @@ function updateStats() {
 }
 function updateBadge() {
   const pCount = reports.filter(r => r.status === 'pending').length;
-  document.getElementById('pending-badge').textContent = pCount;
+  const qsCount = quickReports.length;
+  const total = pCount + qsCount;
+  document.getElementById('pending-badge').textContent = total;
   const ptEl = document.getElementById('pending-badge-tab');
   if (ptEl) ptEl.textContent = pCount;
   const qsEl = document.getElementById('qs-badge-tab');
-  if (qsEl) qsEl.textContent = quickReports.length;
+  if (qsEl) qsEl.textContent = qsCount;
 }
 function updateHomeStats() {
   document.getElementById('hs-total').textContent = reports.filter(r => r.status === 'approved').length;
