@@ -212,6 +212,29 @@ select{background:var(--surface);border:1px solid var(--border);border-radius:va
 .lightbox img{max-width:90vw;max-height:90vh;border-radius:var(--r);object-fit:contain}
 
 
+
+/* FORM / ADMIN TABS */
+.inner-tabs{display:flex;gap:4px;margin-bottom:24px;border-bottom:1px solid var(--border);padding-bottom:0}
+.inner-tab{background:none;border:none;border-bottom:2px solid transparent;color:var(--text2);cursor:pointer;font-family:var(--sans);font-size:14px;font-weight:600;padding:10px 18px;margin-bottom:-1px;transition:all .2s;letter-spacing:.3px}
+.inner-tab:hover{color:var(--text)}
+.inner-tab.active{color:var(--text);border-bottom-color:var(--accent)}
+.inner-view{display:none}.inner-view.active{display:block}
+.qs-note{background:rgba(255,190,11,.07);border:1px solid rgba(255,190,11,.2);border-radius:var(--r);padding:12px 16px;font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:24px}
+.qs-note strong{color:var(--amber)}
+.qs-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:20px 24px;margin-bottom:14px;animation:fadein .3s ease}
+.qs-card:hover{border-color:var(--border2)}
+.qs-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.qs-brand{font-weight:700;font-size:15px}
+.qs-link{color:var(--accent);text-decoration:none;font-family:var(--mono);font-size:12px;display:inline-block;margin-bottom:10px}
+.qs-link:hover{text-decoration:underline}
+.qs-date{font-size:11px;color:var(--text3);font-family:var(--mono)}
+.qs-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.qs-expand{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r2);padding:16px;margin-top:12px;animation:fadein .2s ease}
+.qs-expand h4{font-size:12px;font-weight:600;color:var(--accent);letter-spacing:.5px;font-family:var(--mono);margin-bottom:14px;text-transform:uppercase}
+.admin-search{display:flex;gap:10px;margin-bottom:20px;align-items:center}
+.admin-search input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:10px 16px;color:var(--text);font-family:var(--sans);font-size:14px;outline:none;transition:border-color .2s}
+.admin-search input:focus{border-color:var(--border2)}
+
 /* AUTOCOMPLETE DROPDOWNS */
 .autocomplete-wrap{position:relative}
 .autocomplete-list{position:absolute;top:100%;left:0;right:0;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);z-index:50;max-height:220px;overflow-y:auto;margin-top:3px;box-shadow:0 8px 24px rgba(0,0,0,.4)}
@@ -371,6 +394,13 @@ select{background:var(--surface);border:1px solid var(--border);border-radius:va
 <div class="view" id="view-report">
   <div class="form-section">
     <h2 class="form-title">Zgłoś podróbkę</h2>
+    <div class="inner-tabs">
+      <button class="inner-tab active" onclick="switchFormTab('full')" id="ftab-full">Pełne zgłoszenie</button>
+      <button class="inner-tab" onclick="switchFormTab('qs')" id="ftab-qs">Quick Send</button>
+    </div>
+
+    <!-- PEŁNE ZGŁOSZENIE -->
+    <div class="inner-view active" id="fview-full">
     <p class="form-subtitle">Zgłoszenie trafi do moderacji. Pola oznaczone <span style="color:var(--accent)">*</span> są wymagane.</p>
     <div class="form-grid">
       <div class="form-group autocomplete-wrap">
@@ -412,6 +442,32 @@ select{background:var(--surface);border:1px solid var(--border);border-radius:va
       <button class="btn btn-secondary" onclick="clearForm()">Wyczyść</button>
     </div>
     <div class="success-msg" id="success-msg"><h4>✓ Zgłoszenie wysłane!</h4><p>Dziękujemy. Twoje zgłoszenie trafiło do moderacji.</p></div>
+    </div><!-- /fview-full -->
+
+    <!-- QUICK SEND -->
+    <div class="inner-view" id="fview-qs">
+      <div class="qs-note"><strong>⚡ Quick Send</strong> — szybkie zgłoszenie wymaga tylko linku do ogłoszenia i marki. Admin uzupełni resztę danych. Jeśli masz czas, skorzystaj z <strong>Pełnego zgłoszenia</strong> — zaoszczędzi to adminom pracy i przyspieszy weryfikację.</div>
+      <div class="form-grid full">
+        <div class="form-group">
+          <label>Link do ogłoszenia <span class="req">*</span></label>
+          <input type="url" id="qs-listing" placeholder="https://www.vinted.pl/items/..." oninput="checkQsDuplicate()">
+          <div class="dup-warning" id="qs-dup-warning">⚠ To ogłoszenie zostało już zgłoszone.</div>
+        </div>
+      </div>
+      <div class="form-grid full">
+        <div class="form-group autocomplete-wrap">
+          <label>Marka podróbki <span class="req">*</span></label>
+          <input type="text" id="qs-brand" placeholder="np. Nike, Louis Vuitton, Stone Island..." autocomplete="off" oninput="onQsBrandInput()" onblur="hideDropdown('ac-qs-brand')" onfocus="onQsBrandInput()">
+          <div class="autocomplete-list" id="ac-qs-brand" style="display:none"></div>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" onclick="submitQuickReport()">Wyślij Quick Send →</button>
+        <button class="btn btn-secondary" onclick="clearQsForm()">Wyczyść</button>
+      </div>
+      <div class="success-msg" id="qs-success-msg"><h4>✓ Quick Send wysłany!</h4><p>Dziękujemy. Admin uzupełni resztę danych i zweryfikuje zgłoszenie.</p></div>
+    </div><!-- /fview-qs -->
+
   </div>
 </div>
 
@@ -432,13 +488,30 @@ select{background:var(--surface);border:1px solid var(--border);border-radius:va
 
 <!-- ADMIN -->
 <div class="view" id="view-admin">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:28px">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
     <div>
       <h2 style="font-size:22px;font-weight:800;letter-spacing:-.5px">Panel moderatora</h2>
       <p style="font-size:13px;color:var(--text2);margin-top:4px">Oczekujące zgłoszenia wyświetlane jako pierwsze</p>
     </div>
   </div>
-  <div id="admin-grid"></div>
+  <div class="inner-tabs">
+    <button class="inner-tab active" onclick="switchAdminTab('reports')" id="atab-reports">Zgłoszenia <span class="badge" id="pending-badge-tab">0</span></button>
+    <button class="inner-tab" onclick="switchAdminTab('qs')" id="atab-qs">Quick Send <span class="badge" id="qs-badge-tab" style="background:var(--amber)">0</span></button>
+  </div>
+  <!-- Zgłoszenia -->
+  <div class="inner-view active" id="aview-reports">
+    <div class="admin-search">
+      <input type="text" id="admin-search" placeholder="Szukaj po marce..." oninput="renderAdmin()">
+    </div>
+    <div id="admin-grid"></div>
+  </div>
+  <!-- Quick Send -->
+  <div class="inner-view" id="aview-qs">
+    <div class="admin-search">
+      <input type="text" id="qs-admin-search" placeholder="Szukaj po marce..." oninput="renderQsAdmin()">
+    </div>
+    <div id="qs-admin-grid"></div>
+  </div>
 </div>
 
 </main>
@@ -532,23 +605,23 @@ COUNTRIES.forEach(c => { const o = document.createElement('option'); o.value = c
 async function loadReports() {
   try {
     const session = supabaseClient.auth.getSession ? (await supabaseClient.auth.getSession()).data.session : null;
-    const authHeader = session
-      ? `Bearer ${session.access_token}`
-      : `Bearer ${SUPABASE_KEY}`;
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/reports?order=timestamp.desc`, {
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': authHeader
-      }
-    });
-    if (!res.ok) { reports = []; updateAll(); return; }
-    const data = await res.json();
-    reports = Array.isArray(data) ? data : [];
+    const authHeader = session ? `Bearer ${session.access_token}` : `Bearer ${SUPABASE_KEY}`;
+    const [res1, res2] = await Promise.all([
+      fetch(`${SUPABASE_URL}/rest/v1/reports?order=timestamp.desc`, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': authHeader }
+      }),
+      fetch(`${SUPABASE_URL}/rest/v1/quick_reports?order=timestamp.desc`, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': authHeader }
+      })
+    ]);
+    reports = res1.ok ? (await res1.json()) : [];
+    quickReports = res2.ok ? (await res2.json()) : [];
+    if (!Array.isArray(reports)) reports = [];
+    if (!Array.isArray(quickReports)) quickReports = [];
   } catch(e) {
-    reports = [];
+    reports = []; quickReports = [];
   }
   updateAll();
-  // Animuj liczniki przy pierwszym załadowaniu
   if (document.getElementById('view-home').classList.contains('active')) updateHomeStatsAnimated();
 }
 
@@ -637,7 +710,14 @@ function updateStats() {
   document.getElementById('stat-approved').textContent = reports.filter(r => r.status === 'approved').length;
   document.getElementById('stat-pending').textContent = reports.filter(r => r.status === 'pending').length;
 }
-function updateBadge() { document.getElementById('pending-badge').textContent = reports.filter(r => r.status === 'pending').length; }
+function updateBadge() {
+  const pCount = reports.filter(r => r.status === 'pending').length;
+  document.getElementById('pending-badge').textContent = pCount;
+  const ptEl = document.getElementById('pending-badge-tab');
+  if (ptEl) ptEl.textContent = pCount;
+  const qsEl = document.getElementById('qs-badge-tab');
+  if (qsEl) qsEl.textContent = quickReports.length;
+}
 function updateHomeStats() {
   document.getElementById('hs-total').textContent = reports.filter(r => r.status === 'approved').length;
   const uniq = new Set(reports.filter(r => r.status === 'approved').map(r => r.username.toLowerCase())).size;
@@ -739,11 +819,14 @@ function renderBrowse() {
 
 function renderAdmin() {
   editingId = null;
-  const pending = reports.filter(r => r.status === 'pending').sort((a, b) => a.timestamp - b.timestamp);
+  const q = (document.getElementById('admin-search')?.value || '').toLowerCase();
+  let pending = reports.filter(r => r.status === 'pending');
+  if (q) pending = pending.filter(r => r.brand.toLowerCase().includes(q));
+  pending.sort((a, b) => a.timestamp - b.timestamp);
   const groups = groupByUser(pending);
   groups.forEach(ug => expandedUsers.add(ug.username.toLowerCase()));
   const grid = document.getElementById('admin-grid');
-  if (!groups.length) { grid.innerHTML = `<div class="empty"><div class="empty-icon">✅</div><h3>Brak oczekujących zgłoszeń</h3><p>Wszystkie zgłoszenia zostały rozpatrzone.</p></div>`; return; }
+  if (!groups.length) { grid.innerHTML = `<div class="empty"><div class="empty-icon">✅</div><h3>Brak oczekujących zgłoszeń</h3><p>${q ? 'Brak wyników dla tej marki.' : 'Wszystkie zgłoszenia zostały rozpatrzone.'}</p></div>`; return; }
   grid.innerHTML = groups.map(ug => userGroupHTML(ug, true)).join('');
 }
 
@@ -813,8 +896,20 @@ function removePhoto(i) { uploadedPhotos.splice(i, 1); renderPreviews(); }
 
 function checkDuplicate() {
   const val = document.getElementById('f-listing').value.trim();
-  const isDup = val && reports.some(r => r.listing && r.listing.trim() === val);
+  const isDup = val && (
+    reports.some(r => r.listing && r.listing.trim() === val) ||
+    quickReports.some(r => r.listing && r.listing.trim() === val)
+  );
   document.getElementById('dup-warning').classList.toggle('show', isDup);
+}
+
+function checkQsDuplicate() {
+  const val = document.getElementById('qs-listing').value.trim();
+  const isDup = val && (
+    reports.some(r => r.listing && r.listing.trim() === val) ||
+    quickReports.some(r => r.listing && r.listing.trim() === val)
+  );
+  document.getElementById('qs-dup-warning').classList.toggle('show', isDup);
 }
 
 async function submitReport() {
@@ -826,7 +921,7 @@ async function submitReport() {
   if (!country) { alert('Wybierz kraj konta.'); return; }
   if (!brand) { alert('Wpisz markę podróbki.'); return; }
   if (!uploadedPhotos.length) { alert('Dodaj co najmniej jedno zdjęcie dowodowe.'); return; }
-  if (listing && reports.some(r => r.listing && r.listing.trim() === listing)) {
+  if (listing && (reports.some(r => r.listing && r.listing.trim() === listing) || quickReports.some(r => r.listing && r.listing.trim() === listing))) {
     alert('To ogłoszenie zostało już zgłoszone. Nie można dodać duplikatu.');
     return;
   }
@@ -976,6 +1071,251 @@ function updateHomeStatsAnimated() {
   const uniq = new Set(reports.filter(r => r.status === 'approved').map(r => r.username.toLowerCase())).size;
   animateCounter(document.getElementById('hs-total'), approved, 800);
   animateCounter(document.getElementById('hs-users'), uniq, 800);
+}
+
+// ── ZAKŁADKI FORMULARZA ───────────────────────────────────────────────────
+function switchFormTab(tab) {
+  ['full','qs'].forEach(t => {
+    document.getElementById('fview-'+t).classList.toggle('active', t===tab);
+    document.getElementById('ftab-'+t).classList.toggle('active', t===tab);
+  });
+}
+
+// ── ZAKŁADKI PANELU ADMINA ────────────────────────────────────────────────
+function switchAdminTab(tab) {
+  ['reports','qs'].forEach(t => {
+    document.getElementById('aview-'+t).classList.toggle('active', t===tab);
+    document.getElementById('atab-'+t).classList.toggle('active', t===tab);
+  });
+  if (tab === 'qs') renderQsAdmin();
+  else renderAdmin();
+}
+
+// ── QUICK SEND AUTOCOMPLETE MARKI ────────────────────────────────────────
+function onQsBrandInput() {
+  const q = document.getElementById('qs-brand').value.trim().toLowerCase();
+  const list = document.getElementById('ac-qs-brand');
+  if (!q) { list.style.display = 'none'; return; }
+  const brands = [...new Set(reports.map(r => r.brand).filter(b => b && b.toLowerCase().includes(q)))];
+  if (!brands.length) { list.style.display = 'none'; return; }
+  list.innerHTML = brands.slice(0,8).map(b => `
+    <div class="autocomplete-item" onmousedown="selectQsBrand('${b.replace(/'/g,"\'")}')">
+      <div class="ac-main">${b}</div>
+    </div>`).join('');
+  list.style.display = 'block';
+}
+function selectQsBrand(brand) {
+  document.getElementById('qs-brand').value = brand;
+  document.getElementById('ac-qs-brand').style.display = 'none';
+}
+
+// ── SUBMIT QUICK SEND ─────────────────────────────────────────────────────
+async function submitQuickReport() {
+  const listing = document.getElementById('qs-listing').value.trim();
+  const brand = document.getElementById('qs-brand').value.trim();
+  if (!listing) { alert('Wpisz link do ogłoszenia.'); return; }
+  if (!brand) { alert('Wpisz markę podróbki.'); return; }
+  if (reports.some(r => r.listing && r.listing.trim() === listing) ||
+      quickReports.some(r => r.listing && r.listing.trim() === listing)) {
+    alert('To ogłoszenie zostało już zgłoszone. Nie można dodać duplikatu.');
+    return;
+  }
+  const r = { id: Date.now().toString(36) + Math.random().toString(36).slice(2,6), timestamp: Date.now(), listing, brand };
+  const submitBtn = document.querySelector('#fview-qs .btn-primary');
+  if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Wysyłanie...'; }
+  try {
+    const session = (await supabaseClient.auth.getSession()).data.session;
+    const authHeader = session ? `Bearer ${session.access_token}` : `Bearer ${SUPABASE_KEY}`;
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/quick_reports`, {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': authHeader, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify(r)
+    });
+    if (!res.ok) { const e = await res.text(); throw new Error(e); }
+    quickReports.unshift(r);
+    updateBadge();
+    document.getElementById('qs-success-msg').classList.add('show');
+    clearQsForm();
+    setTimeout(() => document.getElementById('qs-success-msg').classList.remove('show'), 7000);
+  } catch(e) {
+    alert('Błąd podczas wysyłania: ' + e.message);
+  } finally {
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Wyślij Quick Send →'; }
+  }
+}
+
+function clearQsForm() {
+  document.getElementById('qs-listing').value = '';
+  document.getElementById('qs-brand').value = '';
+  document.getElementById('qs-dup-warning').classList.remove('show');
+}
+
+// ── RENDER QS ADMIN ───────────────────────────────────────────────────────
+function renderQsAdmin() {
+  const q = (document.getElementById('qs-admin-search')?.value || '').toLowerCase();
+  let list = [...quickReports].sort((a,b) => a.timestamp - b.timestamp);
+  if (q) list = list.filter(r => r.brand.toLowerCase().includes(q));
+  const grid = document.getElementById('qs-admin-grid');
+  if (!list.length) {
+    grid.innerHTML = `<div class="empty"><div class="empty-icon">⚡</div><h3>Brak zgłoszeń Quick Send</h3><p>${q ? 'Brak wyników dla tej marki.' : 'Żadne szybkie zgłoszenia nie czekają.'}</p></div>`;
+    return;
+  }
+  grid.innerHTML = list.map(r => qsCardHTML(r)).join('');
+}
+
+function qsCardHTML(r) {
+  return `<div class="qs-card" id="qsc-${r.id}">
+    <div class="qs-card-header">
+      <div>
+        <div class="qs-brand">${r.brand}</div>
+        <div class="qs-date">zgłoszono ${fmtDate(r.timestamp)}</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-edit" onclick="toggleQsExpand('${r.id}')">✎ Uzupełnij i zatwierdź</button>
+        <button class="btn btn-reject" onclick="rejectQsReport('${r.id}')">✕ Odrzuć</button>
+      </div>
+    </div>
+    <a href="${r.listing}" target="_blank" class="qs-link">↗ ${r.listing}</a>
+    <div id="qs-expand-${r.id}"></div>
+  </div>`;
+}
+
+function toggleQsExpand(id) {
+  const panel = document.getElementById(`qs-expand-${id}`);
+  if (qsEditingId === id) { panel.innerHTML = ''; qsEditingId = null; return; }
+  qsEditingId = id;
+  const r = quickReports.find(x => x.id === id);
+  const COUNTRIES_LIST = Array.from(document.getElementById('f-country').options).slice(1).map(o => o.value);
+  const countryOptions = COUNTRIES_LIST.map(c => `<option value="${c}">${c}</option>`).join('');
+  panel.innerHTML = `<div class="qs-expand">
+    <h4>✎ Uzupełnij dane — ${currentAdmin.login}</h4>
+    <div class="edit-grid">
+      <div class="edit-group autocomplete-wrap">
+        <label>Nick użytkownika *</label>
+        <input id="qe-username-${id}" placeholder="np. monika_sklep22" autocomplete="off"
+          oninput="onQsUsernameInput('${id}')" onblur="hideDropdown('ac-qe-username-${id}')" onfocus="onQsUsernameInput('${id}')">
+        <div class="autocomplete-list" id="ac-qe-username-${id}" style="display:none"></div>
+      </div>
+      <div class="edit-group">
+        <label>Kraj konta *</label>
+        <select id="qe-country-${id}"><option value="">— wybierz kraj —</option>${countryOptions}</select>
+      </div>
+      <div class="edit-group">
+        <label>Link do profilu</label>
+        <input id="qe-profile-${id}" placeholder="https://www.vinted.pl/member/..." value="">
+      </div>
+      <div class="edit-group">
+        <label>Marka</label>
+        <input id="qe-brand-${id}" value="${r.brand}">
+      </div>
+    </div>
+    <div class="edit-grid full" style="margin-top:10px">
+      <div class="edit-group">
+        <label>Opis nieścisłości (opcjonalnie)</label>
+        <textarea id="qe-desc-${id}" style="min-height:72px;line-height:1.6" placeholder="Opcjonalnie..."></textarea>
+      </div>
+    </div>
+    <div class="edit-actions">
+      <button class="btn btn-approve" onclick="approveQsReport('${id}')">✓ Zatwierdź i dodaj do bazy</button>
+      <button class="btn btn-secondary" onclick="toggleQsExpand('${id}')">Anuluj</button>
+    </div>
+  </div>`;
+}
+
+function onQsUsernameInput(id) {
+  const inputEl = document.getElementById(`qe-username-${id}`);
+  const q = inputEl.value.trim().toLowerCase();
+  const list = document.getElementById(`ac-qe-username-${id}`);
+  if (!q) { list.style.display = 'none'; return; }
+  const users = [];
+  const seen = new Set();
+  reports.forEach(r => {
+    const key = r.username.toLowerCase();
+    if (!seen.has(key) && key.includes(q)) {
+      seen.add(key);
+      users.push(r);
+    }
+  });
+  if (!users.length) { list.style.display = 'none'; return; }
+  list.innerHTML = users.slice(0,8).map(r => `
+    <div class="autocomplete-item" onmousedown="selectQsUser('${id}','${r.username.replace(/'/g,"\'")}','${(r.profile||'').replace(/'/g,"\'")}','${(r.country||'').replace(/'/g,"\'")}')">
+      <div class="ac-main">@${r.username}</div>
+      <div class="ac-sub">${r.country || ''}${r.profile ? ' · profil zapisany' : ''}</div>
+    </div>`).join('');
+  list.style.display = 'block';
+}
+
+function selectQsUser(id, username, profile, country) {
+  document.getElementById(`qe-username-${id}`).value = username;
+  if (profile) document.getElementById(`qe-profile-${id}`).value = profile;
+  if (country) {
+    const sel = document.getElementById(`qe-country-${id}`);
+    for (let o of sel.options) { if (o.value === country) { sel.value = country; break; } }
+  }
+  document.getElementById(`ac-qe-username-${id}`).style.display = 'none';
+}
+
+async function approveQsReport(id) {
+  const username = document.getElementById(`qe-username-${id}`).value.trim();
+  const country = document.getElementById(`qe-country-${id}`).value;
+  const brand = document.getElementById(`qe-brand-${id}`).value.trim();
+  const qs = quickReports.find(x => x.id === id);
+  if (!username) { alert('Wpisz nick użytkownika.'); return; }
+  if (!country) { alert('Wybierz kraj konta.'); return; }
+  if (!brand) { alert('Wpisz markę.'); return; }
+  const newReport = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
+    timestamp: Date.now(),
+    status: 'approved',
+    username,
+    country,
+    profile: document.getElementById(`qe-profile-${id}`).value.trim() || null,
+    listing: qs.listing,
+    brand,
+    description: document.getElementById(`qe-desc-${id}`).value.trim() || null,
+    photos: [],
+    edit_log: { who: currentAdmin.login, at: Date.now() }
+  };
+  try {
+    const session = (await supabaseClient.auth.getSession()).data.session;
+    const authHeader = session ? `Bearer ${session.access_token}` : `Bearer ${SUPABASE_KEY}`;
+    // Dodaj do reports
+    const r1 = await fetch(`${SUPABASE_URL}/rest/v1/reports`, {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': authHeader, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify(newReport)
+    });
+    if (!r1.ok) throw new Error(await r1.text());
+    // Usuń z quick_reports
+    const r2 = await fetch(`${SUPABASE_URL}/rest/v1/quick_reports?id=eq.${id}`, {
+      method: 'DELETE',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': authHeader }
+    });
+    if (!r2.ok) throw new Error(await r2.text());
+    reports.unshift(newReport);
+    quickReports = quickReports.filter(r => r.id !== id);
+    updateAll();
+    renderQsAdmin();
+    qsEditingId = null;
+  } catch(e) {
+    alert('Błąd: ' + e.message);
+  }
+}
+
+async function rejectQsReport(id) {
+  openModal('Odrzucić zgłoszenie Quick Send?', 'Zgłoszenie zostanie trwale usunięte.', async () => {
+    try {
+      const session = (await supabaseClient.auth.getSession()).data.session;
+      const authHeader = session ? `Bearer ${session.access_token}` : `Bearer ${SUPABASE_KEY}`;
+      await fetch(`${SUPABASE_URL}/rest/v1/quick_reports?id=eq.${id}`, {
+        method: 'DELETE',
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': authHeader }
+      });
+      quickReports = quickReports.filter(r => r.id !== id);
+      updateBadge();
+      renderQsAdmin();
+    } catch(e) { alert('Błąd: ' + e.message); }
+  });
 }
 
 loadReports();
