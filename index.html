@@ -1187,8 +1187,7 @@ function toggleQsExpand(id) {
   if (qsEditingId === id) { panel.innerHTML = ''; qsEditingId = null; return; }
   qsEditingId = id;
   const r = quickReports.find(x => x.id === id);
-  const COUNTRIES_LIST = Array.from(document.getElementById('f-country').options).slice(1).map(o => o.value);
-  const countryOptions = COUNTRIES_LIST.map(c => `<option value="${c}">${c}</option>`).join('');
+  const countryOptions = COUNTRIES.map(c => `<option value="${c}">${c}</option>`).join('');
   panel.innerHTML = `<div class="qs-expand">
     <h4>✎ Uzupełnij dane — ${currentAdmin.login}</h4>
     <div class="edit-grid">
